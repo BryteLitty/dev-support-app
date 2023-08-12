@@ -61,3 +61,55 @@ export const checkAuthStatus = async (setUser, setLoading, router) => {
         console.error(err);
     }
 }
+
+
+// ADDING STAFF NEW STAFF
+// generate random string as ID
+const generateID = () => Math.random().toString(36).substring(2, 24);
+
+export const addUser = async (name, email, password) => {
+    try {
+        // create a new account on Appwrite Auth
+        await account.create(generateID(), email, password, name);
+        
+        await db.createDocument(
+            process.env.NEXT_PUBLIC_DB_ID,
+            process.env.NEXT_PUBLIC_USERS_COLLECTION_ID,
+            ID.unique(),
+            { user_id: generateID(), name, email }
+        );
+        successMessage("User added successfully")
+    } catch {err} {
+        console.log(err);
+    }
+};
+
+
+// getting the staff list
+export const getUsers = async (setUsers) => {
+    try {
+        const response = await db.listDocuments(
+            process.env.NEXT_PUBLIC_DB_ID,
+            process.env.NEXT_PUBLIC_USERS_COLLECTION_ID
+        );
+        setUsers(response.documents);
+    } catch (err) {
+        console.log(err)
+    }
+};
+
+
+// removing staff
+export const deleteUser = async (id) => {
+    try {
+        await db.deleteDocument(
+            process.env.NEXT_PUBLIC_DB_ID,
+            process.env.NEXT_PUBLIC_USERS_COLLECTION_ID,
+            id
+        );
+        successMessage('User removed')
+    } catch(err) {
+        console.log(err);
+        errorMessage("Encountered an error");
+    }
+};
