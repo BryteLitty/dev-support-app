@@ -113,3 +113,77 @@ export const deleteUser = async (id) => {
         errorMessage("Encountered an error");
     }
 };
+
+
+// creating a support ticket
+export const sendTicket = async (name, email, subject, message, attachment) => {
+    const createTicket = async (file_url = "https://google.com") => {
+        try {
+            const response = await db.createDocument(
+                process.env.NEXT_PUBLIC_DB_ID,
+                process.env.NEXT_PUBLIC_TICKETS_COLLECTION_ID,
+                ID.unique(),
+                {
+                    name,
+                    email,
+                    subject,
+                    content: message,
+                    status: open,
+                    message: [
+                        JSON.stringify({
+                            id: generateID(),
+                            content: message,
+                            admin: false,
+                            name: "Customer"
+                        }),
+                    ],
+                    attachment_url: file_url,
+                    access_code: generateID()
+                }
+            );
+            // send notification to the customer
+            console.log('RESPONSE >>>', response);
+            successMessage("Ticket created")
+        } catch (err) {
+            errorMessage("Encountered error saving ticket")
+        }
+    };
+
+    if (attachment !== null) {
+        try {
+            const response = await storage.createFile(
+                process.env.NEXT_PUBLIC_BUCKET_ID,
+                ID.unique(),
+                attachment
+            );
+            const file_url = `https://cloud.appwrite.io/v1/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_ID}/files/${response.$id}/view?project=${process.env.NEXT_PUBLIC_PROJECT_ID}&mode=admin`;
+            // creates ticket with its image
+            createTicket(file_url);
+        } catch (err) {
+            errorMessage("Error uploading the image");
+        }
+    } else {
+        await createTicket();
+    }
+};
+
+
+// getting tickets 
+export const getTickets = async (setOpenTickets, setInProgressTickests, setCompletedTickets) => {
+    try {
+        const response = await db.listDocuments(
+            process.env.NEXT_PUBLIC_DB_ID,
+            process.env.NEXT_PUBLIC_TICKETS_COLLECTION_ID
+        );
+        const tickets = response.documents;
+        const openTickets = tickets.filter((ticket) => ticket.status === "open");
+        const inProgressTickets = tickets.filter((ticket) => ticket.status === "in-progess");
+        const completedTickets = tickets.filter((ticket) => ticket.status === "completed");
+
+        setCompletedTickets(completedTickets);
+        setInProgressTickests(inProgressTickets);
+        setOpenTickets(openTickets);
+    } catch (err) {
+        console.log(err);
+    }
+};
