@@ -187,3 +187,103 @@ export const getTickets = async (setOpenTickets, setInProgressTickests, setCompl
         console.log(err);
     }
 };
+
+
+// getting ticket details
+export async function getServerSideProps(context) {
+    let ticketObject = {};
+
+    try {
+        const res = await db.getDocument(
+            process.env.NEXT_PUBLIC_DB_ID,
+            process.env.NEXT_PUBLIC_TICKETS_COLLECTION_ID,
+            context.id
+        );
+        ticketObject = res;
+    } catch (err) {
+        ticketObject = {};
+    } 
+    
+    return {
+        props: { ticketObject },
+    };
+};
+
+
+// updating ticket Status
+export const updateTicketStatus = async (id, status) => {
+    try {
+        await db.updateDocument(
+            process.env.NEXT_PUBLIC_BUCKET_ID,
+            process.env.NEXT_PUBLIC_TICKETS_COLLECTION_ID,
+        );
+    } catch (err) {
+        console.log(err);
+        errorMessage("Encountered an error");
+    }
+};
+
+// CHAT FUNCTIONS
+// sendMessage 
+export const sendMessage = async (text, docId) => {
+    // get ticket ID
+    const document = await db.getDocument(
+        process.env.NEXT_PUBLIC_BUCKET_ID,
+        process.env.NEXT_PUBLIC_TICKETS_COLLECTION_ID,
+        docId
+    );
+
+    try {
+        // get the use's object (admin)
+        const user = await account.get();
+        const result = await db.updateDocument(
+            process.env.NEXT_PUBLIC_DB_ID,
+            process.env.NEXT_PUBLIC_TICKETS_COLLECTION_ID,
+            docId,
+            {
+                message: [
+                    ...document.messages,
+                    JSON.stringify({
+                        id: generateID(),
+                        const: text,
+                        admin: true,
+                        name: user.name
+                    })
+                ]
+            }
+        );
+
+        // if message was added successfully
+        if (result.$id) {
+            successMessage("Message sent!");
+            // email the customer with access code and chat URL
+        } else {
+            errorMessage("Error! Try resending your message")
+        }
+    } catch (err) {
+        // means the user is a customer
+        const result = await db.updateDocument(
+            process.env.NEXT_PUBLIC_BUCKET_ID,
+            process.env.NEXT_PUBLIC_TICKETS_COLLECTION_ID,
+            docId, 
+            {
+                messages: [
+                    ...docId.messages,
+                    JSON.stringify({
+                        id: generateID(),
+                        content: text,
+                        admin: false,
+                        name: "Customer",
+                    }),
+                ],
+            }
+        );
+        if (result.$id) {
+            successMessage("Message Sent!");
+            // notify staff via notifications
+        } else {
+            errorMessage("Error! Try resending your message")
+        }
+    };
+    
+}
