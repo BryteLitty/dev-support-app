@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emailjs/browser": "^3.11.0",
     "@novu/node": "^0.17.1",
     "@novu/notification-center": "^0.17.1",
     "appwrite": "^11.0.0",

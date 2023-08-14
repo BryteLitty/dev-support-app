@@ -1,16 +1,18 @@
 'use client'
 import React, {useState} from 'react';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
+import { logIn } from '@/utils/functions';
 
 
 const page = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const router = useRouter();
 
     const hanleLogin = (e) => {
         e.preventDefault();
-        
+        logIn(email, setEmail, password, setPassword, router)
     }
 
   return (

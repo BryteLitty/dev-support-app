@@ -24,7 +24,7 @@ const List = () => {
 		try {
 			const user = await account.get();
 			setUser(user);
-			setLoading(false);
+			setLoading(true);
 			getUsers(setUsers);
 		} catch (err) {
 			// router.push("/");
@@ -43,7 +43,7 @@ const List = () => {
     }
   };
 
-  // if (loading) return <Loading />
+  if (loading) return <Loading />
 
   return (
     <>
@@ -56,7 +56,7 @@ const List = () => {
         <div className="md:w-[80%] w-full min-h-[90vh] py-10 px-4">
             <h2 className='text-2xl font-bold mb-6'>Add new staff</h2>
             
-            <form className='w-full flex flex-col mb-[50px]' onSubmit={"dkdk"}>
+            <form className='w-full flex flex-col mb-[50px]' onSubmit={handleSubmit}>
               <div className="w-full flex justify-between space-x-4">
 
                 <div className="w-1/2">

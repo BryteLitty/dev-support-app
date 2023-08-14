@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState, useRef } from "react";
 import Navbar from "./components/Navbar";
 import Form from "./components/Form";
-
+import AuthChatModal from "./components/AuthChatModal";
 
 export default function Home() {
 
