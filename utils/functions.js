@@ -91,7 +91,7 @@ export const successMessage = (message) => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: light,
+        // theme: light,
     });
 };
 
@@ -105,7 +105,7 @@ export const errorMessage = (message) => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: light,
+        // theme: light,
     })
 };
 
@@ -184,9 +184,11 @@ export const addUser = async (name, email, password) => {
             process.env.NEXT_PUBLIC_USERS_COLLECTION_ID,
             // "64d5b1b0ced831562811", "64d5b1fc98e1cb608772",
             ID.unique(),
-            { user_id: generateID(), name, email }
+            { user_id: generateID(), name, password, email }
         );
         successMessage("User added successfully")
+        console.log({ name, email, password})
+
     } catch (err) {
         if (err.response && err.response.status === 429) {
             // Rate limit exceeded, implement exponential backoff
@@ -437,60 +439,63 @@ export const sendMessage = async (text, docId) => {
 
 // start message
 export const startMessage = async (name, email, subject, message, attachment, setLoading) => {
-    try {
-        const response = await db.createDocument(
-            process.env.NEXT_PUBLIC_DB_ID,
-            process.env.NEXT_PUBLIC_TICKETS_COLLECTION_ID,
-            ID.unique(),
-            {
-                name,
-                email,
-                subject,
-                content: message,
-                status: "open",
-                messages: [
-                    JSON.stringify({
-                        id: generateID(),
-                        content: message,
-                        admin: false,
-                        name: 'Customer'
-                    })
-                ],
-                attachment_url: file_url,
-                access_code: generateID(),
-            }
-        );
-        // email user who created the ticket
-        emailTicketCreation(
-            name, 
-            response.$id,
-            email,
-            convertDateTime(response.$createdAt),
-            subject,
-        );
-        newTicketStaff(name);
-        setLoading(false);
-        successMessage("Ticket Created");
-    } catch(err) {
-        errorMessage("Encountered saving ticket")
-    };
+    // try {
+    //     const response = await db.createDocument(
+    //         process.env.NEXT_PUBLIC_DB_ID,
+    //         process.env.NEXT_PUBLIC_TICKETS_COLLECTION_ID,
+    //         ID.unique(),
+    //         {
+    //             name,
+    //             email,
+    //             subject,
+    //             content: message,
+    //             status: "open",
+    //             messages: [
+    //                 JSON.stringify({
+    //                     id: generateID(),
+    //                     content: message,
+    //                     admin: false,
+    //                     name: 'Customer'
+    //                 })
+    //             ],
+    //             attachment_url: file_url,
+    //             access_code: generateID(),
+    //         }
+    //     );
+    //     // email user who created the ticket
+    //     emailTicketCreation(
+    //         name, 
+    //         response.$id,
+    //         email,
+    //         convertDateTime(response.$createdAt),
+    //         subject,
+    //     );
+    //     newTicketStaff(name);
+    //     setLoading(false);
+    //     successMessage("Ticket Created");
+    // } catch(err) {
+    //     errorMessage("Encountered saving ticket")
+    // };
 
-    if (attachment !== null) {
-        try {
-            const response = await storage.createFile(
-                process.env.NEXT_PUBLIC_BUCKET_ID,
-                ID.unique(),
-                attachment
-            );
-            const file_url = `https://cloud.appwrite.io/v1/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_ID}/files/${response.$id}/view?project=${process.env.NEXT_PUBLIC_PROJECT_ID}&mode=admin`;
-            createTicket(file_url);
-        } catch (err) {
-            errorMessage("Error uploading the image")
-        }
-    } else {
-        await createTicket();
-    }
+    // if (attachment !== null) {
+    //     try {
+    //         const response = await storage.createFile(
+    //             process.env.NEXT_PUBLIC_BUCKET_ID,
+    //             ID.unique(),
+    //             attachment
+    //         );
+    //         const file_url = `https://cloud.appwrite.io/v1/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_ID}/files/${response.$id}/view?project=${process.env.NEXT_PUBLIC_PROJECT_ID}&mode=admin`;
+    //         createTicket(file_url);
+    //     } catch (err) {
+    //         errorMessage("Error uploading the image")
+    //     }
+    // } else {
+    //     // await createTicket();
+    //     await alert('Done')
+    // }
+    console.log({name, email, subject, message, attachment, setLoading})
 };
+
 
 
 // notify staff 

@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { GrAttachment } from 'react-icons/gr';
 import chat from '../images/chat.svg';
+import { startMessage } from '@/utils/functions';
 
 const Form = () => {
 
@@ -13,6 +14,21 @@ const Form = () => {
     const [attachment, setAttachment] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        // console.log({name, email, subject, message })
+
+        setLoading(true)
+        startMessage(name, email, subject, message, attachment, setLoading)
+        setName('')
+        setEmail("")
+        setMessage("")
+        setSubject("")
+        setAttachment(null)
+
+    }
+
   return (
     <div className='w-full min-h-[90vh] flex items-center'>
         <div className='md:w-[60%] w-full h-full flex flex-col py-6 md:px-10 px-4'>
@@ -20,7 +36,7 @@ const Form = () => {
             <p className="opacity-50 mb-6 text-sm">
                 Chat with us, we're available anytime
             </p>
-            <form className="flex flex-col items-start">
+            <form className="flex flex-col items-start" onSubmit={handleSubmit}>
                 <div className="w-full flex justify-between space-x-4">
                     <div className="w-1/2">
                         <label htmlFor="name">Name</label>
@@ -37,7 +53,7 @@ const Form = () => {
                     <div className="w-1/2">
                         <label htmlFor="email">Email</label>
                         <input
-                            type='text'
+                            type='email'
                             name='email'
                             id='email'
                             className='w-full border-[1px] border-gray-200 px-4 py-2 rounded mb-4'

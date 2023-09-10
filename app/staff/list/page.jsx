@@ -24,7 +24,7 @@ const List = () => {
 		try {
 			const user = await account.get();
 			setUser(user);
-			setLoading(true);
+			setLoading(false);
 			getUsers(setUsers);
 		} catch (err) {
 			// router.push("/");
@@ -41,9 +41,10 @@ const List = () => {
     if(password === confirmPassword) {
       addUser(name, email, password);
     }
+    // addUser(name)
   };
 
-  if (loading) return <Loading />
+  // if (loading) return <Loading />
 
   return (
     <>
